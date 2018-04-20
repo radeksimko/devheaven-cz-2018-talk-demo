@@ -21,8 +21,8 @@ jobs:
           path: ../
       - run: go get -v -t -d ./...
       - run: go test -v ./...
-      - run: go build -o ./main.o
-      - run: zip deployment.zip ./main.o
+      - run: go build -o ./main
+      - run: zip example-${CIRCLE_SHA1}.zip ./main
       - persist_to_workspace:
           root: .
           paths:
@@ -36,7 +36,7 @@ jobs:
       - run: |
           PATH=$PATH:/tmp/out/bin
           BUCKET_NAME=$(terraform output -state=00-terraform/terraform.tfstate lambda_bucket_name)
-          aws s3 cp /tmp/out/deployment.zip s3://$BUCKET_NAME/
+          aws s3 cp /tmp/out/example-${CIRCLE_SHA1}.zip s3://$BUCKET_NAME/
 
 workflows:
   version: 2
