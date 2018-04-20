@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -15,12 +14,16 @@ func main() {
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Printf("Processing Lambda request %s\n", request.RequestContext.RequestID)
 
-	if len(request.Body) < 1 {
-		return events.APIGatewayProxyResponse{}, errors.New("no body provided")
+	params := request.QueryStringParameters
+	if _, ok := params["who"]; !ok {
+		return events.APIGatewayProxyResponse{
+			Body:       "No name provided",
+			StatusCode: 400,
+		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{
-		Body:       "Hello " + request.Body,
+		Body:       "Hello " + params["who"],
 		StatusCode: 200,
 	}, nil
 }
