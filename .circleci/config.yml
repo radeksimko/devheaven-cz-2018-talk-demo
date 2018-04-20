@@ -1,11 +1,50 @@
 version: 2
 jobs:
-  build:
+  dependencies:
+    environment: 
+      - TF_VERSION: 0.11.7
+    machine: true
+    steps:
+      - run: |
+          wget https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+          unzip terraform_${TF_VERSION}_linux_amd64.zip -d bin
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./bin
+  build-and-package:
     docker:
       - image: circleci/golang:1.9
-
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}/10-lambda
+    working_directory: /go/src/github.com/radeksimko/devheaven-cz-2018-talk-demo/10-lambda
     steps:
-      - checkout
+      - checkout:
+          path: ../
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+      - run: go build -o ./main.o
+      - run: zip deployment.zip ./main.o
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*.zip
+  upload:
+    machine: true
+    steps:
+      - attach_workspace:
+          at: /tmp/out
+      - checkout
+      - run: |
+          PATH=$PATH:/tmp/out/bin
+          BUCKET_NAME=$(terraform output -state=00-terraform/terraform.tfstate lambda_bucket_name)
+          aws s3 cp /tmp/out/deployment.zip s3://$BUCKET_NAME/
+
+workflows:
+  version: 2
+  build-package-upload:
+    jobs:
+      - dependencies
+      - build-and-package
+      - upload:
+          requires:
+            - dependencies
+            - build-and-package
