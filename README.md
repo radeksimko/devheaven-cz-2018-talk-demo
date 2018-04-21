@@ -31,7 +31,7 @@ CircleCI is used to continuously build, package & upload any new revisions to S3
 ```
 cd 00-terraform
 terraform output aws_access_key_id
-terraform output aws_access_key_secret | base64 -D - | gpg -d
+terraform output aws_access_key_secret | base64 -D - | gpg -d; echo
 ```
 
 ## Next Steps
