@@ -2,6 +2,4 @@ variable "prefix" {
   default = "radek-devheaven"
 }
 
-variable "keybase_user" {
-  default = "radeksimko"
-}
+variable "keybase_user" { }
