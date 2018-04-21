@@ -21,7 +21,7 @@ This directory contains the Go code for Lambda function we can deploy in the nex
 This directory contains API Gateway & Lambda & IAM resources required to deploy the demo.
 
 ```
-terraform apply -var=s3_bucket=$(terraform output lambda_bucket_name -state=../00-terraform/terraform.tfstate)
+terraform apply -var=s3_bucket=$(terraform output -state=../00-terraform/terraform.tfstate lambda_bucket_name)
 ```
 
 ### CI via CircleCI
